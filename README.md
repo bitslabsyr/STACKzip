@@ -10,8 +10,8 @@ STACKzip takes a number of CLI arguments. Those are described below, and you can
 
 To run STACKzip:  
 1) Clone the code to your server using `git clone https://github.com/bitslabsyr/STACKzip.git`.    
-2) Modify several parameters in [zipper.py](https://github.com/bitslabsyr/STACKzip/blob/master/zipper.py): 
-   * Modify the values in [mongo_auth](https://github.com/bitslabsyr/STACKzip/blob/master/zipper.py#L21) as appropriate.  
+2) Rename `config_template.py` to `config.py`. Then, modify several parameters in [config.py](https://github.com/bitslabsyr/STACKzip/blob/master/config_template.py): 
+   * Modify the values in mongo_auth as appropriate.  
      * If your instance of Mongo is password-protected, make sure "AUTH" is true and specify the Mongo username and password. If your instance of Mongo is not password-protected, make sure "AUTH" is false.
 3) Run STACKzip with `sudo python3 zipper.py` along with the arguments you want to use.
     * Two arguments are required:  
