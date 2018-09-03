@@ -23,7 +23,6 @@ from config import mongo_auth
 dirs_to_zip = []
 archive_path_base = '/mnt/data'
 stack_dir = '/home/bits/stack'
-logging.basicConfig(filename='zipper.log',filemode='a+',level=logging.INFO)
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-n","--name", type=str, required=True, help="The name of the server where this script is running")
@@ -34,11 +33,18 @@ ap.add_argument("-m","--mongo", required=False, action='store_true', help="Inclu
 ap.add_argument("-s","--stack-path", required=False, help="Include this option if STACK is not installed in the default path (/home/bits/stack)")
 ap.add_argument("-M", "--manual", type=str, required=False, help="Include this option if you want the code to work only on data in a specified folder. Use this option if the data you want the code to work on isn't STACK data")
 ap.add_argument("-N", "--manual-name", type=str, required=False, help="Include this if using \"-M\" to specify the name of the project. This is important for archiving")
+ap.add_argument("-l", "--log-name", required=False, help="Include this if you plan to run zipper more than once at the same time. (You might do that if you have data in different folders that you want to zip.)")
 #args = vars(ap.parse_args('-n n -t 1'.split()))
 args = vars(ap.parse_args())
 
 server_name = args['name']
 time_to_run = args['time']
+
+if args['log_name']:
+    log_file_name = args['log_name'] + '.log'
+elif not args['log_name']:
+    log_file_name = 'zipper.log'
+logging.basicConfig(filename=log_file_name, filemode='a+', level=logging.DEBUG, format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s")
 
 if args['stack_path']:
     stack_dir = args['stack_path']
