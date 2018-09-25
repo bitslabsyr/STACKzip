@@ -84,6 +84,9 @@ def dynamic_project_identification():
         process_status = [x for x in process_status if "collect" in x]
         if len(process_status) > 0:
             running_projects.append(project)
+        elif len(process_status) == 0:
+            logging.warning('No running STACK projects found. Did you mean to manually specify a directory to archive?\n')
+            raise Exception
     logging.info('Found {} running STACK projects'.format(len(running_projects)))
     dirs_to_zip = []
     for p in running_projects:
@@ -93,6 +96,7 @@ def dynamic_project_identification():
             dirs_to_zip.append(data_path)
         elif not os.path.isdir(data_path):
             logging.critical('Problem! I can\'t find data for project {}. Are there multiple installs of STACK?\n'.format(p))
+            raise Exception
     return dirs_to_zip
 
 
@@ -125,6 +129,8 @@ def stack_archiving():
                 elif daily_files[date]:
                     daily_files[date].append(f)
 
+            logging.info("For project {0}, found {1} files corresponding to {2} days to combine and compress.".format(project_name, len(
+                files_to_combine_and_compress), len(daily_files)))
             for date in daily_files:
                 back_to_date = datetime.datetime.strptime(date, '%Y-%m-%d')
                 gap = today - back_to_date
@@ -135,10 +141,18 @@ def stack_archiving():
                         tar_path = os.path.join(archive_path_base, server_name, project_name)
                     elif not args['archive']:               # If you don't tell the script to archive zip files, it creates a folder for zip files in the folder that contained the original data
                         tar_path = os.path.dirname(os.path.join(dir_to_zip, 'tar_files'))
-                    os.makedirs(tar_path, exist_ok=True)
-                    with tarfile.open(tar_name, 'w:gz') as tar:
-                        for file in files:
-                            tar.add(file)
+                    try:
+                        os.makedirs(tar_path, exist_ok=True)
+                    except:
+                        logging.critical("Cannot make the tar file folder called {0}.".format(tar_path))
+                        raise Exception
+                    try:
+                        with tarfile.open(tar_name, 'w:gz') as tar:
+                            for file in files:
+                                tar.add(file)
+                    except:
+                        logging.critical("Cannot make the tar file called {0}.".format(tarfile))
+                        raise Exception
                     shutil.move(tar_name, os.path.join(tar_path, tar_name))
                     logging.info('Zipped {0} files to {1}'.format(len(files),tar_path))
                     if args['delete']:                      # This loop deletes files after they have been zipped.
@@ -170,6 +184,7 @@ def stack_archiving():
 
         elif not len(project_name) == 1:
             logging.critical("Project name cannot be identified from path: \n\t{}\nCheck path and try again.\n".format(dir_to_zip))
+            raise Exception
 
 
 def other_archiving():
@@ -203,6 +218,7 @@ def other_archiving():
 
     for c in candidate_files:
         daily_files = candidate_files[c]
+        logging.info("For candidate {0}, found files corresponding to {1} days".format(c, len(daily_files)))
         for date in daily_files:
             back_to_date = datetime.datetime.strptime(date, '%Y-%m-%d')
             gap = today - back_to_date
@@ -213,10 +229,18 @@ def other_archiving():
                     tar_path = os.path.join(archive_path_base, server_name, project_name)
                 elif not args['archive']:  # If you don't tell the script to archive zip files, it creates a folder for zip files in the folder that contained the original data
                     tar_path = os.path.dirname(os.path.join(dir_to_zip, 'tar_files'))
-                os.makedirs(tar_path, exist_ok=True)
-                with tarfile.open(tar_name, 'w:gz') as tar:
-                    for file in files:
-                        tar.add(file)
+                try:
+                    os.makedirs(tar_path, exist_ok=True)
+                except:
+                    logging.critical("Cannot make the tar file folder called {0}.".format(tar_path))
+                    raise Exception
+                try:
+                    with tarfile.open(tar_name, 'w:gz') as tar:
+                        for file in files:
+                            tar.add(file)
+                except:
+                    logging.critical("Cannot make the tar file called {0}.".format(tarfile))
+                    raise Exception
                 shutil.move(tar_name, os.path.join(tar_path, tar_name))
                 logging.info('Zipped {0} files to {1}'.format(len(files), tar_path))
                 if args['delete']:  # This loop deletes files after they have been zipped.
