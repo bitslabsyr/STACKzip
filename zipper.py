@@ -84,10 +84,11 @@ def dynamic_project_identification():
         process_status = [x for x in process_status if "collect" in x]
         if len(process_status) > 0:
             running_projects.append(project)
-        elif len(process_status) == 0:
-            logging.warning('No running STACK projects found. Did you mean to manually specify a directory to archive?\n')
-            raise Exception
-    logging.info('Found {} running STACK projects'.format(len(running_projects)))
+    if len(running_projects) > 0:
+        logging.info('Found {} running STACK projects'.format(len(running_projects)))
+    elif len(running_projects) == 0:
+        logging.warning('No running STACK projects found. Did you mean to manually specify a directory to archive?\n')
+        raise Exception
     dirs_to_zip = []
     for p in running_projects:
         p = p.replace('_', '-')
