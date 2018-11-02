@@ -17,6 +17,7 @@ import subprocess
 import sys
 import shutil
 import logging
+import traceback
 
 from config import mongo_auth
 
@@ -257,10 +258,13 @@ def other_archiving():
 
 if __name__ == '__main__':
     while True:
-        if not args['manual']:
-            stack_archiving()
-        elif args['manual']:
-            other_archiving()
+        try:
+            if not args['manual']:
+                stack_archiving()
+            elif args['manual']:
+                other_archiving()
+        except:
+            logging.critical(traceback.format_exc())
         logging.info('Zipping complete. Sleeping until tomorrow.\n')
         sleep = True
         while sleep:
